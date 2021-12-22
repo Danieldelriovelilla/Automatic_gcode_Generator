@@ -1,4 +1,9 @@
 function [code] = Machine_Layer(obj,N,pos, lf, orientation, z, code)
+  % Function to carve a figure in an specified layer
+  %
+  %
+  % This function does NOT access to class atribute obj.code
+
 
 fxy = obj.fxy;
 pn = obj.pn;

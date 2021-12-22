@@ -6,15 +6,15 @@ classdef Automatic_gcode_Generator < handle
 
         % MACHINE PARAMETERS (values given by default)
         d = 3          % [mm] Diameter of the cutting tool
-        pn = 1         %
-        pf = 0.5       %
+        pn = 1         % [mm] Nominal pass
+        pf = 0.5       % [mm] Finishing pass
         zsafe = 1      % [mm] Safe plane hight
         zpas = 1       % [mm] Tool cutting lenght
         Npas = 2       % Number of passes
         fxy = 80       % [mm/min] Plane speed rate
         fz_dw = 80     % [mm/min] Descending speed rate
         fz_up = 30     % [mm/min] Ascending speed rate
-        prof = 1
+        prof = 1       % [mm] Pass depth
 
     end
 
@@ -36,15 +36,15 @@ classdef Automatic_gcode_Generator < handle
           disp('')
           disp('Current machinning configuration')
           disp(['d = ',num2str(obj.d),';          % [mm] Diameter of the cutting tool'])
-          disp(['pn = ',num2str(obj.pn),';         %'])
-          disp(['pf = ',num2str(obj.pf),';       %'])
+          disp(['pn = ',num2str(obj.pn),';         % [mm] Nominal pass'])
+          disp(['pf = ',num2str(obj.pf),';       % [mm] Finishing pass'])
           disp(['zsafe = ',num2str(obj.zsafe),';      % [mm] Safe plane hight'])
           disp(['zpas = ',num2str(obj.zpas),';       % [mm] Tool cutting lenght'])
           disp(['Npas = ',num2str(obj.Npas),';       % Number of passes'])
-          disp(['fxy = ',num2str(obj.fxy),';       % [mm/min] Plane speed rate'])
+          disp(['fxy = ',num2str(obj.fxy),';       %  [mm/min] Plane speed rate'])
           disp(['fz_dw = ',num2str(obj.fz_dw),';     % [mm/min] Descending speed rate'])
           disp(['fz_up = ',num2str(obj.fz_up),';     % [mm/min] Ascending speed rate'])
-          disp(['prof = ',num2str(obj.prof),';       %'])
+          disp(['prof = ',num2str(obj.prof),';       % [mm] Total depth'])
           disp('')
           disp('    * Configuration can be changed')
           disp('      >> obj.attribute = X')
@@ -103,6 +103,25 @@ classdef Automatic_gcode_Generator < handle
               ' F', num2str(f));
       end
 
+      function code = INIT(obj)
+        code = obj.code
+        code = cat(1,code,'G53') % Cancelar decalaje de origen bloque a bloque
+        code = cat(1,code,'M00') % Parada programada incondicional
+        code = cat(1,code,'G71') % Medidas en milímetros
+        code = cat(1,code,'G94') % Avance en mm/min.
+        code = cat(1,code,'G54') % Decalaje de origen 1
+        code = cat(1,code,'G58 X25 Y25') % Decalaje de origen programable 1 (centro de la pieza)
+        obj.code = code
+      end
+
+      function code = FINI(obj)
+        code = obj.code
+        code = cat(1,code,'G0 Z40') % Subida hasta altura de seguridad
+        code = cat(1,code,'M05') % Husillo desactivado
+        code = cat(1,code,'M17') % Fin de subrutina
+        obj.code = code
+      end
+
 
       % function [code] = Machine_Layer(obj, N, lf, orientation, pn, pf, z, code)
       % function [Npas, Nf, hf] = Passes(obj, pn, pf, hf)
@@ -113,14 +132,11 @@ methods (Access = public)
 
       %% Sequence of polygons
 
-      %% function code = Sequence(shapes) 
-
+      % function code = Sequence(shapes)
 
       %% Shapes
 
-      function code = CIRCLE(obj,pos,D)
-        % To be built
-      end
+      % function code = POLYGON(obj,N,pos,L,theta)
 
       function code = HEXAGON(obj,pos,L,theta)
 
@@ -135,7 +151,29 @@ methods (Access = public)
       end
 
       function code = SQUARE(obj,pos,L,theta)
-        % To be built
+
+        code = POLYGON(obj,4,pos,L,theta);
+
+      end
+
+      function code = CIRCLE(obj,pos,D)
+        % Function to carve a circle based in built function L930
+        %   * See POLYGON to get more information about input variables
+        %
+        % This function access to class atribute obj.code and appends new commands to it
+
+        x = pos(1);
+        y = pos(2);
+
+        % Access obj.code
+        code = obj.code;
+        % Go to the center of the shape above zsafe
+        code = cat(1, code, G0(obj,x, y, obj.zsafe));
+        % Carve shape
+        code = cat(1, code, sprintf('R01=%.2f R02=0.0 R03=%.2f R06=02 R15=%.2f R16=%.2f R22=%.2f R23=%.2f R24=%.2f L930',...
+                                       obj.pn,        obj.prof,        obj.fxy, obj.fz_dw,  x,    y,      D/2));
+        % Write obj.code
+        obj.code = code;
       end
 
       % function code = POLYGON(obj,N,pos,L,theta)
@@ -151,7 +189,7 @@ methods (Access = public)
         end
 
         % Write to txt in an ASCII format
-        writecell(code, 'code.txt', 'Delimiter','tab')
+        writecell(code, 'code.txt', 'Delimiter','tab');
 
       end
 
