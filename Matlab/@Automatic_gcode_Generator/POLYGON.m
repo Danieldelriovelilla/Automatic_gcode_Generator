@@ -28,6 +28,7 @@ function code = POLYGON(obj,N,pos,L,theta)
 
 
   %% MACHINING PROCESS
+  % Access code
   code = obj.code;
   % Go to the center of the shape above zsafe
   code = cat(1, code, G0(obj,x, y, zsafe));
@@ -40,7 +41,7 @@ function code = POLYGON(obj,N,pos,L,theta)
       code = Machine_Layer(obj,N,pos, L, orientation, z, code);
   end
   % Tool up to zsafe
-  code = cat(1, code, G1(obj,x, y, zsafe, fz_up));
+  code = cat(1, code, sprintf('G1 Z%d F%d',zsafe,fz_up));
   % Update code
   obj.code = code;
 
