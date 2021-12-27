@@ -9,22 +9,25 @@ function [Npas, Nf, hfinal] = Passes(obj, pn, pf, hf)
 % This function does NOT access to class atribute obj.code
 
 % Remove the tool radious to the total poligon height
-hh = hf - obj.d/2;
-
-% Remove the penetration hole
-hm = hh - obj.d/2;
+hm = hf - obj.d/2;
 
 % Calculate the number of normal pases
 Npas = round(hm/pn);
 
-% Calculate the final height after the normal pases
-hfinal = round(hm - round( hm/pn ),3);
-if hfinal <= pn && hfinal < pf
-    Npas = Npas - 1;
+% Calculate pasess
+if Npas <= 1
+    Npas = 0;
+    % Calculate the final height after the normal pases   
     Nf = 2;
-    hfinal = [pf-hfinal, pf];
+    hfinal = [hm-pf, pf];
 else
-    Nf = 1;
+    hend = round(hm - Npas*pn, 3);
+    if hend == pf
+        Nf = 1;
+    else
+        Nf = 2;
+        hfinal = [hend-pf, pf];
+    end
 end
-disp(['Passes: ', num2str(Npas)])
+
 end

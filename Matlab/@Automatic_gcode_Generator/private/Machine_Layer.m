@@ -18,17 +18,18 @@ y = pos(2);
 theta = 2*pi/N;
 Rot = Rz(obj,theta);
 hf = Height(obj, lf, theta);
-% Number of passes
 
+% Number of passes
 [Npas, Nf, hf] = Passes(obj, pn, pf, hf);
 
 % Machining process
-h = obj.d/2;
+h = 0;% obj.d/2;
 
 % Plot tool circle
 figure();
     hold on
     viscircles([x,y], obj.d/2, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
+    scatter(x, y, 'k', 'fill')
 for i = 1:Npas
     % Geometry
     h = h + pn;

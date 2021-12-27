@@ -18,45 +18,45 @@ function code = Sequence(obj,shapes)
 %
 % vargout code: code with all movements of the tool
 
-%% Read from CSV in case
+% Read from CSV in case
 shapes = readtable(shapes);
 
-%%  Initialization
+%  Initialization
 INIT(obj);
 code = obj.code;
 
 for i=1:height(shapes)
-    %% Shape characteristics (cell)
+    % Shape characteristics (cell)
     N = shapes.N_LADOS(i);          % Number of sides
     pos = [shapes.CENTRO_X(i), shapes.CENTRO_Y(i)];          % Center of the shape
     L = shapes.LONGITUD_LADO(i);          % Characteristic lenght
     theta = shapes.ORIENTACION(i);        % Orientation of the shape
 
-    %% Go to center and carve shape
+    % Go to center and carve shape
     switch N
         case 0
             D = L;
-            CIRCLE(obj,pos,D);
             disp('Machining a circle')
+            CIRCLE(obj,pos,D);
         case 4
-            SQUARE(obj,pos,L,theta);
             disp('Machining a square')
+            SQUARE(obj,pos,L,theta);
         case 5
-            PENTAGON(obj,pos,L,theta);
             disp('Machining a pentagon')
+            PENTAGON(obj,pos,L,theta);
         case 6
-            HEXAGON(obj,pos,L,theta);
             disp('Machining an hexagon')
+            HEXAGON(obj,pos,L,theta);
         otherwise
             disp(['Error in shape',num2str(i)])
     end
 
 end
 
-%% Finalization
+% Finalization
 FINI(obj);
 
-%% Save to TXT
+% Save to TXT
 SaveGCode(obj,obj.code);
 
 end

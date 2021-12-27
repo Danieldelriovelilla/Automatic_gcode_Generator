@@ -122,13 +122,14 @@ classdef Automatic_gcode_Generator < handle
             code = cat(1,code,'G71'); % Medidas en milímetros
             code = cat(1,code,'G94'); % Avance en mm/min.
             code = cat(1,code,'G54'); % Decalaje de origen 1
-            code = cat(1,code,'G58 X25 Y25'); % Decalaje de origen programable 1 (centro de la pieza)
+            code = cat(1,code,'G58 X0 Y0'); % Decalaje de origen programable 1 (centro de la pieza)
             obj.code = code;
         end
 
         function code = FINI(obj)
             code = obj.code;
-            code = cat(1,code,'G0 Z40'); % Subida hasta altura de seguridad
+            code = cat(1,code,'G0 Z5 F30'); % Subida hasta altura de seguridad
+            code = cat(1,code,'G0 X0 Y0 Z5 F80'); % Subida hasta altura de seguridad
             code = cat(1,code,'M05');    % Husillo desactivado
             code = cat(1,code,'M17');    % Fin de subrutina
             obj.code = code;
@@ -150,7 +151,7 @@ classdef Automatic_gcode_Generator < handle
             figure();
                 viscircles([pos(1),pos(2)], obj.d/2, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
                 hold on
-                viscircles([pos(1),pos(2)], (D-obj.d)/2, 'color', 'k', 'LineWidth', 0.5);
+                viscircles([pos(1),pos(2)], (D-obj.d), 'color', 'k', 'LineWidth', 0.5);
                 axis('equal')
                 box on
             x = pos(1);
@@ -160,8 +161,10 @@ classdef Automatic_gcode_Generator < handle
             % Go to the center of the shape above zsafe
             code = cat(1, code, G0(obj,x, y, obj.zsafe));
             % Carve shape
+            code = cat(1, code, G1(obj,x, y, -obj.prof, obj.fz_dw));
             code = cat(1, code, sprintf('R01=%.2f R02=0.0 R03=%.2f R06=02 R15=%.2f R16=%.2f R22=%.2f R23=%.2f R24=%.2f L930',...
                 obj.pn, obj.prof, obj.fxy, obj.fz_dw, x, y, D/2));
+            code = cat(1, code, G1(obj,x, y, obj.prof, obj.fz_dw));
             % Write obj.code
             obj.code = code;
         end       
