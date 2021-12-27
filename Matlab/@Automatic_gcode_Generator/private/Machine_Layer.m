@@ -1,7 +1,11 @@
 function [code] = Machine_Layer(obj, N, pos, lf, orientation, z, code)
 % Function to carve a figure in an specified layer
-%
-%
+% N: Number of sides
+% pos: x, y coordinates
+% lf: final side length
+% orientation: orientation respect x axis
+% z: height
+% code: gcode
 % This function does NOT access to class atribute obj.code
 
 fxy = obj.fxy;
@@ -13,17 +17,18 @@ y = pos(2);
 % Poligon properties
 theta = 2*pi/N;
 Rot = Rz(obj,theta);
-hf = Height(obj,lf, theta);
-
+hf = Height(obj, lf, theta);
 % Number of passes
+
 [Npas, Nf, hf] = Passes(obj, pn, pf, hf);
 
 % Machining process
-h = 1.5;
+h = obj.d/2;
+
 % Plot tool circle
 figure();
     hold on
-    viscircles([x,y],1.5, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
+    viscircles([x,y], obj.d/2, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
 for i = 1:Npas
     % Geometry
     h = h + pn;

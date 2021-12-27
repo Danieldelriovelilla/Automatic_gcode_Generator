@@ -72,7 +72,7 @@ classdef Automatic_gcode_Generator < handle
         end
 
         function h = Height(obj,l, theta)
-            h = (l/2)/tan(theta/2);
+            h = (l/2)/cos(theta/2);
         end
 
         function l = Height2Edge(obj,h, theta)
