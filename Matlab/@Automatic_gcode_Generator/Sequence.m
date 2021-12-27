@@ -19,55 +19,34 @@ function code = Sequence(obj,shapes)
 % vargout code: code with all movements of the tool
 
 %% Read from CSV in case
-if isstring(shapes) || ischar(shapes)
-    shapes_cell = {};
-    data = fopen(shapes);
-    lines = textscan(data,'%s','Delimiter','\n');
-    lines = lines{1,1};
-    fclose('all');
-    for i=1:length(lines)
-        val = textscan(lines{i},'%s','Delimiter',',');
-        val = val{1,1}';
-        N = str2double(val{1,1});
-        x = str2double(val{1,2});
-        y = str2double(val{1,3});
-        L = str2double(val{1,4});
-        try
-            theta = str2double(val{1,5});
-            shapes_cell = cat(1,shapes_cell,{N,[x,y],L,theta});
-        catch
-            shapes_cell = cat(1,shapes_cell,{N,[x,y],L});
-        end
-    end
-    shapes = shapes_cell;
-end
+shapes = readtable(shapes);
 
 %%  Initialization
 INIT(obj);
 code = obj.code;
 
-for i=1:size(shapes,1)
+for i=1:height(shapes)
     %% Shape characteristics (cell)
-    N   = shapes{i,1};          % Number of sides
-    pos = shapes{i,2};          % Center of the shape
-    L   = shapes{i,3};          % Characteristic lenght
-    try
-        theta = shapes{i,4};        % Orientation of the shape
-    catch
-        IsACircle = 'True';
-    end
+    N = shapes.N_LADOS(i);          % Number of sides
+    pos = [shapes.CENTRO_X(i), shapes.CENTRO_Y(i)];          % Center of the shape
+    L = shapes.LONGITUD_LADO(i);          % Characteristic lenght
+    theta = shapes.ORIENTACION(i);        % Orientation of the shape
 
     %% Go to center and carve shape
     switch N
         case 0
             D = L;
             CIRCLE(obj,pos,D);
+            disp('Machining a circle')
         case 4
             SQUARE(obj,pos,L,theta);
+            disp('Machining a square')
         case 5
             PENTAGON(obj,pos,L,theta);
+            disp('Machining a pentagon')
         case 6
             HEXAGON(obj,pos,L,theta);
+            disp('Machining an hexagon')
         otherwise
             disp(['Error in shape',num2str(i)])
     end

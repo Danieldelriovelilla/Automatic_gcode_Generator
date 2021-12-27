@@ -10,7 +10,7 @@ classdef Automatic_gcode_Generator < handle
         pf = 0.5       % [mm] Finishing pass
         zsafe = 1      % [mm] Safe plane hight
         zpas = 1       % [mm] Tool cutting lenght
-        Npas = 2       % Number of passes
+        Npas = 1       % Number of passes
         fxy = 80       % [mm/min] Plane speed rate
         fz_dw = 80     % [mm/min] Descending speed rate
         fz_up = 30     % [mm/min] Ascending speed rate
@@ -165,7 +165,11 @@ classdef Automatic_gcode_Generator < handle
             %   * See POLYGON to get more information about input variables
             %
             % This function access to class atribute obj.code and appends new commands to it
-
+            figure();
+                hold on
+                viscircles([0,0],D/2, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
+                axis('equal')
+                box on
             x = pos(1);
             y = pos(2);
 
@@ -175,7 +179,7 @@ classdef Automatic_gcode_Generator < handle
             code = cat(1, code, G0(obj,x, y, obj.zsafe));
             % Carve shape
             code = cat(1, code, sprintf('R01=%.2f R02=0.0 R03=%.2f R06=02 R15=%.2f R16=%.2f R22=%.2f R23=%.2f R24=%.2f L930',...
-                obj.pn,        obj.prof,        obj.fxy, obj.fz_dw,  x,    y,      D/2));
+                obj.pn, obj.prof, obj.fxy, obj.fz_dw, x, y, D/2));
             % Write obj.code
             obj.code = code;
         end

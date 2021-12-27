@@ -1,4 +1,4 @@
-function [code] = Machine_Layer(obj,N,pos, lf, orientation, z, code)
+function [code] = Machine_Layer(obj, N, pos, lf, orientation, z, code)
   % Function to carve a figure in an specified layer
   %
   %
@@ -23,7 +23,7 @@ hf = Height(obj,lf, theta);
 h = 1.5;
 figure();
     hold on
-    viscircles([0,0],1.5, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5)
+    viscircles([0,0],1.5, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
 for i = 1:Npas
     % Geometry
     h = h + pn;
