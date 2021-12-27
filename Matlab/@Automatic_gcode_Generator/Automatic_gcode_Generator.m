@@ -166,8 +166,9 @@ classdef Automatic_gcode_Generator < handle
             %
             % This function access to class atribute obj.code and appends new commands to it
             figure();
+                viscircles([pos(1),pos(2)], obj.d/2, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
                 hold on
-                viscircles([0,0],D/2, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
+                viscircles([pos(1),pos(2)], D/2, 'color', 'k', 'LineWidth', 0.5);
                 axis('equal')
                 box on
             x = pos(1);
