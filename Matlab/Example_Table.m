@@ -2,7 +2,6 @@ clc
 clear
 close all
 
-
 % Create generator object
 gen = Automatic_gcode_Generator();
 

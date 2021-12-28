@@ -8,9 +8,9 @@ classdef Automatic_gcode_Generator < handle
         d = 3          % [mm] Diameter of the cutting tool
         pn = 1         % [mm] Nominal pass
         pf = 0.5       % [mm] Finishing pass
-        zsafe = 1      % [mm] Safe plane hight
-        zpas = 1       % [mm] Tool cutting lenght
-        Npas = 1       % Number of passes
+        zsafe = 1.      % [mm] Safe plane hight
+        zpas = 1.       % [mm] Tool cutting lenght
+        Npas = 1.       % Number of passes
         fxy = 80       % [mm/min] Plane speed rate
         fz_dw = 80     % [mm/min] Descending speed rate
         fz_up = 30     % [mm/min] Ascending speed rate
@@ -123,6 +123,7 @@ classdef Automatic_gcode_Generator < handle
             code = cat(1,code,'G94'); % Avance en mm/min.
             code = cat(1,code,'G54'); % Decalaje de origen 1
             code = cat(1,code,'G58 X0 Y0'); % Decalaje de origen programable 1 (centro de la pieza)
+            code = cat(1,code,G0(obj, 0., 0., obj.zsafe)); % Decalaje de origen programable 1 (centro de la pieza)
             obj.code = code;
         end
 
@@ -148,12 +149,7 @@ classdef Automatic_gcode_Generator < handle
             %   * See POLYGON to get more information about input variables
             %
             % This function access to class atribute obj.code and appends new commands to it
-            figure();
-                viscircles([pos(1),pos(2)], obj.d/2, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
-                hold on
-                viscircles([pos(1),pos(2)], (D-obj.d), 'color', 'k', 'LineWidth', 0.5);
-                axis('equal')
-                box on
+            % Center coordinates
             x = pos(1);
             y = pos(2);
             % Access obj.code
@@ -164,9 +160,16 @@ classdef Automatic_gcode_Generator < handle
             code = cat(1, code, G1(obj,x, y, -obj.prof, obj.fz_dw));
             code = cat(1, code, sprintf('R01=%.2f R02=0.0 R03=%.2f R06=02 R15=%.2f R16=%.2f R22=%.2f R23=%.2f R24=%.2f L930',...
                 obj.pn, obj.prof, obj.fxy, obj.fz_dw, x, y, D/2));
-            code = cat(1, code, G1(obj,x, y, obj.prof, obj.fz_dw));
+            code = cat(1, code, G1(obj,x, y, obj.prof, obj.fz_up));
             % Write obj.code
             obj.code = code;
+            % Plot final shape
+            figure();
+                viscircles([pos(1),pos(2)], obj.d/2, 'color', 'k','LineStyle', '--', 'LineWidth', 0.5);
+                hold on
+                viscircles([pos(1),pos(2)], (D-obj.d), 'color', 'k', 'LineWidth', 0.5);
+                axis('equal')
+                box on
         end       
         % Square shape
         function code = SQUARE(obj,pos,L,theta)
@@ -195,10 +198,80 @@ classdef Automatic_gcode_Generator < handle
             for i = 1:length(code)
                 code{i,1} = strcat('N', num2str(10*i));
             end
-
+            code = Clean_GCode(obj, code);
             % Write to txt in an ASCII format
             writecell(code, 'code.txt', 'Delimiter','tab', 'Encoding','ASCII');
+        end
+        
+        function [clean_code] = Clean_GCode(obj, code)
+            % Load the G lines
+            clean_code = code(:,2);
+            % Remove the repeated coordinates
+            for i = 2:size(code, 1) 
+                if ( contains(code{i, 2}, 'G0') || contains(code{i, 2}, 'G1') )...
+                        && ( contains(code{i-1, 2}, 'G0') || contains(code{i-1, 2}, 'G1') )        
+                    % FIND COORDINATES
+                    % Line i-1
+                    if contains(code{i-1, 2}, 'G0')
+                        [x, y, z] = If_G0(obj, code{i-1,2});
+                    elseif contains(code{i-1, 2}, 'G1') 
+                        [x, y, z] = If_G1(obj, code{i-1,2});
+                    end
+                    % Line i
+                    if contains(code{i, 2}, 'G0')
+                        [x1, y1, z1] = If_G0(obj, code{i,2});
+                    elseif contains(code{i, 2}, 'G1') 
+                        [x1, y1, z1] = If_G1(obj, code{i,2});
+                    end
+                    % COMPARE COORDINATES
+                    % Z
+                    if z == z1
+                        strz = strcat(' Z', num2str(z));
+                        idx = strfind(code{i, 2}, strz);
+                        clean_code{i, 1}(idx:idx+length(strz)-1) = [];
+                    end
+                    % Y
+                    if y == y1
+                        stry = strcat(' Y', num2str(y));
+                        idx = strfind(code{i, 2}, stry);
+                        clean_code{i, 1}(idx:idx+length(stry)-1) = [];
+                    end
+                    % X
+                    if x == x1
+                        strx = strcat(' X', num2str(x));
+                        idx = strfind(code{i, 2}, strx);
+                        clean_code{i, 1}(idx:idx+length(strx)-1) = [];
+                    end
+                else        
+                end
 
+            end
+            % Write the lines
+            clean_code(:,2) = clean_code(:,1);
+            clean_code(:,1) = code(:,1);
+        end
+        
+        function [x, y, z] = If_G0(obj, code)
+        % Coordinate indexes of i-1 line
+        idxx = find( code == 'X' );
+        idxy = find( code == 'Y' );
+        idxz = find( code == 'Z' );
+        % Coordinate indexes of i-1 line
+        x = str2double(code(idxx+1:idxy-2));
+        y = str2double(code(idxy+1:idxz-2));
+        z = str2double(code(idxz+1:end));
+        end
+
+        function [x, y, z] = If_G1(obj, code)
+        % Coordinate indexes of i-1 line
+        idxx = find( code == 'X' );
+        idxy = find( code == 'Y' );
+        idxz = find( code == 'Z' );
+        idxf = find( code == 'F' );
+        % Coordinate indexes of i-1 line
+        x = str2double(code(idxx+1:idxy-2));
+        y = str2double(code(idxy+1:idxz-2));
+        z = str2double(code(idxz+1:idxf-2));
         end
 
     end

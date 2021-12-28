@@ -12,10 +12,10 @@ function [Npas, Nf, hfinal] = Passes(obj, pn, pf, hf)
 hm = hf - obj.d/2;
 
 % Calculate the number of normal pases
-Npas = round(hm/pn);
+Npas = floor(hm/pn - 0.5);
 
 % Calculate pasess
-if Npas <= 1
+if Npas < 1
     Npas = 0;
     % Calculate the final height after the normal pases   
     Nf = 2;

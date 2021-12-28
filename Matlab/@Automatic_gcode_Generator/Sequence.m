@@ -36,16 +36,12 @@ for i=1:height(shapes)
     switch N
         case 0
             D = L;
-            disp('Machining a circle')
             CIRCLE(obj,pos,D);
         case 4
-            disp('Machining a square')
             SQUARE(obj,pos,L,theta);
         case 5
-            disp('Machining a pentagon')
             PENTAGON(obj,pos,L,theta);
         case 6
-            disp('Machining an hexagon')
             HEXAGON(obj,pos,L,theta);
         otherwise
             disp(['Error in shape',num2str(i)])

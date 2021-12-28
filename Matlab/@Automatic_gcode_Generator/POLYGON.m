@@ -32,17 +32,17 @@ fz_up = obj.fz_up;
 % Access code
 code = obj.code;
 % Go to the center of the shape above zsafe
-code = cat(1, code, G0(obj,x, y, zsafe));
+code = cat(1, code, G0(obj, x, y, zsafe));
 % Carve shape in different levels
 for i = 1:Npas
     % Tool down
     z = -i*zpas;
-    code = cat(1, code, G1(obj,x, y, z, fz_dw));
+    code = cat(1, code, G1(obj, x, y, z, fz_dw));
     % Carving
-    code = Machine_Layer(obj,N,pos, L, orientation, z, code);
+    [code, v] = Machine_Layer(obj,N,pos, L, orientation, z, code);
 end
 % Tool up to zsafe
-code = cat(1, code, sprintf('G1 Z%d F%d',zsafe,fz_up));
+code = cat(1, code, G1(obj, v(1,1), v(1,2), zsafe, fz_up)); % sprintf('G1 Z%d F%d',zsafe,fz_up));
 % Update code
 obj.code = code;
 
