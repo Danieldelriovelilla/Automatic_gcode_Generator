@@ -18,9 +18,15 @@ gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 # setting threshold of gray image
 _, threshold = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
 
-# using a findContours() function
-contours, _ = cv2.findContours(
-	threshold, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+# perform Hough transform
+lines = cv2.HoughLines(threshold, 1, np.pi/180, 200)
+
+# canny detection from lines
+edges = cv2.Canny(threshold, -50, 50, apertureSize=3)
+
+# finding contours
+contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
 
 i = 0
 Triangle_idx = 0
