@@ -122,7 +122,7 @@ classdef Automatic_gcode_Generator < handle
             code = cat(1,code,'G71'); % Medidas en milímetros
             code = cat(1,code,'G94'); % Avance en mm/min.
             code = cat(1,code,'G54'); % Decalaje de origen 1
-            code = cat(1,code,'G58 X0 Y0'); % Decalaje de origen programable 1 (centro de la pieza)
+            code = cat(1,code,'G58 X25 Y25 Z12'); % Decalaje de origen programable 1 (centro de la pieza)
             code = cat(1,code,G0(obj, 0., 0., obj.zsafe)); % Decalaje de origen programable 1 (centro de la pieza)
             obj.code = code;
         end
@@ -170,7 +170,7 @@ classdef Automatic_gcode_Generator < handle
                 viscircles([pos(1),pos(2)], (D-obj.d), 'color', 'k', 'LineWidth', 0.5);
                 axis('equal')
                 box on
-        end       
+        end
         % Square shape
         function code = SQUARE(obj,pos,L,theta)
             code = POLYGON(obj, 4, pos, L, theta);
@@ -202,25 +202,25 @@ classdef Automatic_gcode_Generator < handle
             % Write to txt in an ASCII format
             writecell(code, 'code.txt', 'Delimiter','tab', 'Encoding','ASCII');
         end
-        
+
         function [clean_code] = Clean_GCode(obj, code)
             % Load the G lines
             clean_code = code(:,2);
             % Remove the repeated coordinates
-            for i = 2:size(code, 1) 
+            for i = 2:size(code, 1)
                 if ( contains(code{i, 2}, 'G0') || contains(code{i, 2}, 'G1') )...
-                        && ( contains(code{i-1, 2}, 'G0') || contains(code{i-1, 2}, 'G1') )        
+                        && ( contains(code{i-1, 2}, 'G0') || contains(code{i-1, 2}, 'G1') )
                     % FIND COORDINATES
                     % Line i-1
                     if contains(code{i-1, 2}, 'G0')
                         [x, y, z] = If_G0(obj, code{i-1,2});
-                    elseif contains(code{i-1, 2}, 'G1') 
+                    elseif contains(code{i-1, 2}, 'G1')
                         [x, y, z] = If_G1(obj, code{i-1,2});
                     end
                     % Line i
                     if contains(code{i, 2}, 'G0')
                         [x1, y1, z1] = If_G0(obj, code{i,2});
-                    elseif contains(code{i, 2}, 'G1') 
+                    elseif contains(code{i, 2}, 'G1')
                         [x1, y1, z1] = If_G1(obj, code{i,2});
                     end
                     % COMPARE COORDINATES
@@ -242,7 +242,7 @@ classdef Automatic_gcode_Generator < handle
                         idx = strfind(code{i, 2}, strx);
                         clean_code{i, 1}(idx:idx+length(strx)-1) = [];
                     end
-                else        
+                else
                 end
 
             end
@@ -250,7 +250,7 @@ classdef Automatic_gcode_Generator < handle
             clean_code(:,2) = clean_code(:,1);
             clean_code(:,1) = code(:,1);
         end
-        
+
         function [x, y, z] = If_G0(obj, code)
         % Coordinate indexes of i-1 line
         idxx = find( code == 'X' );
