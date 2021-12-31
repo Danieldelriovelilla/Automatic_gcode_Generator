@@ -6,6 +6,9 @@ classdef Automatic_gcode_Generator < handle
 
         % MACHINE PARAMETERS (values given by default)
         d = 3          % [mm] Diameter of the cutting tool
+        G58_X = 0       % [mm] Decalaje eje X
+        G58_Y = 0       % [mm] Decalaje eje Y
+        G58_Z = 0       % [mm] Decalaje eje Z
         pn = 1         % [mm] Nominal pass
         pf = 0.5       % [mm] Finishing pass
         zsafe = 1.      % [mm] Safe plane hight
@@ -17,6 +20,7 @@ classdef Automatic_gcode_Generator < handle
         prof = 1       % [mm] Pass depth
         % Code
         code = {}      % Code which will be written
+        code_path = './Code.txt'    % Code path
     end
 
     %% Constructor
@@ -36,6 +40,9 @@ classdef Automatic_gcode_Generator < handle
             disp('')
             disp('Current machinning configuration')
             disp(['d = ',num2str(obj.d),';          % [mm] Diameter of the cutting tool'])
+            disp(['G58_X = ',num2str(obj.G58_X),';          % [mm] Decalaje eje X'])
+            disp(['G58_Y = ',num2str(obj.G58_Y),';          % [mm] Decalaje eje Y'])
+            disp(['G58_Z = ',num2str(obj.G58_Z),';          % [mm] Decalaje eje Z'])
             disp(['pn = ',num2str(obj.pn),';         % [mm] Nominal pass'])
             disp(['pf = ',num2str(obj.pf),';       % [mm] Finishing pass'])
             disp(['zsafe = ',num2str(obj.zsafe),';      % [mm] Safe plane hight'])
@@ -121,8 +128,12 @@ classdef Automatic_gcode_Generator < handle
             code = cat(1,code,'M00'); % Parada programada incondicional
             code = cat(1,code,'G71'); % Medidas en milímetros
             code = cat(1,code,'G94'); % Avance en mm/min.
+            code = cat(1,code,'G90'); % Coordenadas absolutas.
             code = cat(1,code,'G54'); % Decalaje de origen 1
-            code = cat(1,code,'G58 X25 Y25 Z12'); % Decalaje de origen programable 1 (centro de la pieza)
+            code = cat(1,code,['G58 ',...
+                'X', num2str(obj.G58_X), ' ',...
+                'Y', num2str(obj.G58_Y), ' ',...
+                'Z', num2str(obj.G58_Z)]); % Decalaje de origen programable 1 (centro de la pieza)
             code = cat(1,code,G0(obj, 0., 0., obj.zsafe)); % Decalaje de origen programable 1 (centro de la pieza)
             obj.code = code;
         end
@@ -200,7 +211,7 @@ classdef Automatic_gcode_Generator < handle
             end
             code = Clean_GCode(obj, code);
             % Write to txt in an ASCII format
-            writecell(code, 'code.txt', 'Delimiter','tab', 'Encoding','ASCII');
+            writecell(code, obj.code_path, 'Delimiter','tab', 'Encoding','ASCII');
         end
 
         function [clean_code] = Clean_GCode(obj, code)
