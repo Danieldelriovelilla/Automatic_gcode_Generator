@@ -141,8 +141,8 @@ classdef Automatic_gcode_Generator < handle
 
         function code = FINI(obj)
             code = obj.code;
-            % code = cat(1,code, ['G1 Z' num2str(obj.zsafe), ' F' num2str(obj.fz_up)]); % Subida hasta altura de seguridad
-            code = cat(1,code, obj.G0(0, 0, 30)); % Subida hasta altura de seguridad
+            code = cat(1,code,strcat('G1 ' obj.zsafeZ1 F30')); % Subida hasta altura de seguridad
+            code = cat(1,code,'G0 X0 Y0 Z5 F80'); % Subida hasta altura de seguridad
             code = cat(1,code,'M05');    % Husillo desactivado
             code = cat(1,code,'M17');    % Fin de subrutina
             obj.code = code;
