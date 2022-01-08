@@ -172,7 +172,7 @@ classdef Automatic_gcode_Generator < handle
             code = cat(1, code, G1(obj,x, y, -obj.prof, obj.fz_dw));
             code = cat(1, code, sprintf('R01=%.2f R02=0.0 R03=%.2f R06=02 R15=%.2f R16=%.2f R22=%.2f R23=%.2f R24=%.2f L930',...
                 obj.pn, obj.prof, obj.fxy, obj.fz_dw, x, y, D/2));
-            code = cat(1, code, G1(obj,x, y, obj.prof, obj.fz_up));
+            code = cat(1, code, G1(obj,x, y, obj.zsafe, obj.fz_up));
             % Write obj.code
             obj.code = code;
             % Plot final shape
